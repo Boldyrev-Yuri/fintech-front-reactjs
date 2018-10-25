@@ -126,4 +126,123 @@ class Counter extends Component {
   }
 }
 
+export class EditForm extends Component {
+  state = { 
+    id: this.props.id, 
+    task: this.props.value,
+    edit: this.props.edit
+  };
+
+  changeState = (id, task, edit) => {
+    this.setState((state) => ({
+      id: id, 
+      task: task,
+      edit: edit
+    }));
+  };
+
+  editElement = () => {
+    this.changeState(this.state.id, this.state.task, true);
+  }
+
+  removeElement = (id) => {
+    this.props.del(id);
+  }
+
+  confirmEdit = (id) => {
+    const value = document.getElementById("editinput" + id).value;
+    this.props.change(id, value);
+    this.changeState(this.state.id, value, false);
+  }
+
+  cancelEdit = () => {
+    this.changeState(this.state.id, this.state.task, false);
+  }
+
+  render() {
+    let form;
+    if(this.state.edit === false) {
+      form = 
+      <div className="container">
+        <div className="row row-centered" id={"dv" + this.state.id}>
+          <div className="col-md-5 offset-md-2">
+            <li id={"li" + this.state.id}>
+              <span id={"sp" + this.state.id}>{this.state.task}</span>
+            </li>
+          </div>
+          <div className="col-md-3">
+            <button type="button" className="btn btn-warning" onClick={() => this.editElement()}>
+              Изменить
+            </button>
+            <button type="button" className="btn btn-danger" onClick={() => this.removeElement(this.state.id)}>
+              Удалить
+            </button>
+          </div>
+        </div>
+      </div>;
+    } else {
+      form = 
+      <div className="container">
+        <div className="row row-centered" id={"dv" + this.state.id}>
+          <div className="col-md-5 offset-md-2">
+            <li id={"li" + this.state.id}>
+              <input type="text" id={"editinput" + this.state.id} defaultValue={this.state.task} onChange={e => this.setState({ text: e.target.value })} placeholder="Напишите здесь задачу" required></input>
+            </li>
+          </div>
+          <div className="col-md-3">
+            <button type="button" className="btn btn-success" onClick={() => this.confirmEdit(this.state.id)}>
+              Подтвердить
+            </button>
+            <button type="button" className="btn btn-default" onClick={() => this.cancelEdit()}>
+              Отменить
+            </button>
+          </div>
+        </div>
+      </div>;
+    }
+    return form;
+  }
+}
+
+export class ToDoList extends Component {
+  state = { tasks: [] };
+
+  addElement = () => {
+    const value = document.getElementById("myinput").value;
+    console.log(12345);
+    document.getElementById("myinput").value = '';
+    if (value !== '') {
+      this.state.tasks.push(value);
+      this.forceUpdate();
+    }
+  }
+
+  editElement = (id, value) => {
+    //не используется setState (forceUpdate), чтобы не рендерить весь список
+    this.state.tasks[id] = value;
+  }
+  
+  removeElement = (id) => {
+    delete this.state.tasks[id]
+    console.log(id);
+    this.forceUpdate();
+  }
+
+  render() {
+    var mylist = this.state.tasks.map((value, i) => {
+      return <EditForm id={i} key={i} value={value} edit={false} del={this.removeElement} change={this.editElement}/>;
+    })
+
+    return (
+      <div className="App">
+        <h4>Дополнительное задание. TODO</h4>
+        <p className="lead">To-do List</p>
+        <input type="text" id="myinput" placeholder="Напишите здесь задачу" required></input>
+        <button type="button" class="btn btn-success" onClick={() => this.addElement()}>Добавить</button>
+        <ul>{mylist}</ul>
+      </div>
+    );
+  }
+}
+
 export default Counter;

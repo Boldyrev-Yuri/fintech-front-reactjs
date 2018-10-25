@@ -9,6 +9,7 @@ const rootElement = document.getElementById("root");
 const page = 
 <div>
     <Counter init={0} step={1} max={10} message={"Счетчик достиг предельного значения"} />
+    <ToDoList />
 </div>;
 
 ReactDOM.render(page, rootElement);
