@@ -1,244 +1,349 @@
 import React, { Component } from 'react';
 import './App.css';
-import "./bootstrap.css";
+import './bootstrap.css';
 
 class Counter extends Component {
-
-  state = { 
+  //Начальные параметры счетчика
+  state = {
     counter: this.props.init,
     init: this.props.init,
     step: this.props.step,
     max: this.props.max,
-    message: this.props.message
-   };
+    message: this.props.message,
+    isMessageVisible: false
+  };
 
-  changeState = (c) => {
-    this.setState((state) => ({
+  updateMessage = btn => {
+    if (
+      (this.state.counter - this.state.step <= -this.state.max &&
+        btn === 'min') ||
+      (this.state.counter + this.state.step >= this.state.max &&
+        btn === 'max') ||
+      (Math.abs(this.state.init) >= this.state.max && btn === 'res') ||
+      (Math.abs(this.state.counter) >= this.state.max &&
+        typeof btn === 'undefined')
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  updateCounter = (c, bool) => {
+    this.setState({
       counter: c,
-      init: this.state.init,
-      step: this.state.step,
-      max: this.state.max,
-      message: this.state.message
-    }));
+      isMessageVisible: bool
+    });
   };
 
   increment = () => {
-    const pMessage = document.getElementById("message");
     if (this.state.counter < this.state.max) {
-      if (this.state.counter + this.state.step >= this.state.max) {
-        pMessage.style.visibility = "visible";
-      } else {
-        pMessage.style.visibility = "hidden";
-      }
       const c = Math.min(this.state.counter + this.state.step, this.state.max);
-
-      this.changeState(c);
+      this.updateCounter(c, this.updateMessage('max'));
     }
   };
 
   decrement = () => {
-    const pMessage = document.getElementById("message");
     if (this.state.counter > -this.state.max) {
-      if (this.state.counter - this.state.step <= -this.state.max) {
-        pMessage.style.visibility = "visible";
-      } else {
-        pMessage.style.visibility = "hidden";
-      }
-      const c = Math.max(this.state.counter - this.state.step, - this.state.max);
-
-      this.changeState(c);
+      const c = Math.max(this.state.counter - this.state.step, -this.state.max);
+      this.updateCounter(c, this.updateMessage('min'));
     }
   };
 
   reset = () => {
-    const pMessage = document.getElementById("message");
-    pMessage.style.visibility = "hidden";
-    this.changeState(this.state.init);
+    this.updateCounter(this.state.init, this.updateMessage('res'));
   };
 
-  save =() => {
-    const init = parseInt(document.getElementById("init").value);
-    const max = parseInt(document.getElementById("max").value);
-    const step = parseInt(document.getElementById("step").value);
+  updateInputValue = evt => {
+    const value =
+      evt.target.name === 'message'
+        ? evt.target.value
+        : parseInt(evt.target.value, 10);
+    const init =
+      evt.target.name === 'init'
+        ? parseInt(evt.target.value, 10)
+        : this.state.init;
+    const max =
+      evt.target.name === 'max'
+        ? parseInt(evt.target.value, 10)
+        : this.state.max;
 
-    if (isNaN(init) || isNaN(max) || isNaN(step)) {
-      alert("Ошибка. Все значения должны быть объявлены.");
-    } else if (init <= max && init >= -max) {
-      this.setState((state) => ({
-        counter: parseInt(document.getElementById("init").value),
-        init: parseInt(document.getElementById("init").value),
-        step: parseInt(document.getElementById("step").value),
-        max: parseInt(document.getElementById("max").value),
-        message: document.getElementById("mes").value
-      }));
-    } else {
-      alert("Ошибка. Допустимые значения init: от -max до max.");
+    if (
+      (isNaN(value) && evt.target.name !== 'message') ||
+      (value === '' && evt.target.name === 'message')
+    ) {
+      alert('Ошибка. Все значения должны быть объявлены.');
+      this.forceUpdate();
     }
-  }
+    if (init > max || init < -max) {
+      alert('Допустимые значения init: от - max до max.');
+      this.forceUpdate();
+    } else {
+      this.setState({
+        [evt.target.name]: value
+      });
+    }
+  };
 
   render() {
+    let className = 'alert alert-info';
+    if (this.state.isMessageVisible) {
+      className += ' show';
+    } else {
+      className += ' hide';
+    }
     return (
-      <div className="App">
+      <div className='App'>
         <h4>Основное задание. Счетчик</h4>
-        <div className="container">
-          <p className="lead">Начальные значения:</p>
-          <div className="row row-centered">
-            <div className="col-sm-2 offset-sm-3">
-              init<br/>
-              <input id="init" type="number" defaultValue="0" className="form-control" min="0" max="100"></input>
+        <div className='container'>
+          <p className='lead'>Начальные значения:</p>
+          <div className='row row-centered'>
+            <div className='col-sm-2 offset-sm-3'>
+              init<br />
+              <input
+                id='init'
+                type='number'
+                value={this.state.init}
+                className='form-control'
+                name='init'
+                min='-100'
+                max='100'
+                onChange={evt => this.updateInputValue(evt)}
+              />
             </div>
-            <div className="col-sm-2">
+            <div className='col-sm-2'>
               max<br />
-              <input id="max" type="number" defaultValue="10" className="form-control" min="1" max="100"></input>
+              <input
+                id='max'
+                type='number'
+                value={this.state.max}
+                className='form-control'
+                name='max'
+                min='1'
+                max='100'
+                onChange={evt => this.updateInputValue(evt)}
+              />
             </div>
-            <div className="col-sm-2">
+            <div className='col-sm-2'>
               step<br />
-              <input id="step" type="number" defaultValue="1" className="form-control" min="1" max="100"></input>
+              <input
+                id='step'
+                type='number'
+                value={this.state.step}
+                className='form-control'
+                name='step'
+                min='1'
+                max='100'
+                onChange={evt => this.updateInputValue(evt)}
+              />
             </div>
           </div>
-          <div className="row">
-            <div className="col-4 col-centered">
+          <div className='row'>
+            <div className='col-6 col-centered'>
               message<br />
-              <input id="mes" type="text" defaultValue="Счетчик достиг предельного значения" className="form-control"></input>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col col-centered">
-              <button className="btn btn-primary" onClick={this.save}>
-                Сохранить
-              </button>
+              <input
+                id='mes'
+                type='text'
+                value={this.state.message}
+                className='form-control'
+                name='message'
+                onChange={evt => this.updateInputValue(evt)}
+              />
             </div>
           </div>
         </div>
-        <p className="lead">Значение счетчика: <span>{this.state.counter}</span></p>
-        <button className="btn btn-success" onClick={this.increment}>
+        <p className='lead'>
+          Значение счетчика: <span>{this.state.counter}</span>
+        </p>
+        <button className='btn btn-success' onClick={this.increment}>
           Увеличить
         </button>
-        <button className="btn btn-danger" onClick={this.decrement}>
+        <button className='btn btn-danger' onClick={this.decrement}>
           Уменьшить
         </button>
-        <button className="btn btn-warning" onClick={this.reset}>
+        <button className='btn btn-warning' onClick={this.reset}>
           Сбросить
         </button>
-        <p className="alert alert-info" id="message" style={{ textAlign: "center", visibility: "hidden" }}> {this.state.message} </p>
+        <p className={className} id='message'>
+          {' '}
+          {this.state.message}{' '}
+        </p>
       </div>
     );
   }
 }
 
 export class EditForm extends Component {
-  state = { 
-    id: this.props.id, 
+  state = {
+    id: this.props.id,
     task: this.props.value,
-    edit: this.props.edit
-  };
-
-  changeState = (id, task, edit) => {
-    this.setState((state) => ({
-      id: id, 
-      task: task,
-      edit: edit
-    }));
+    edit: this.props.edit,
+    editInput: ''
   };
 
   editElement = () => {
-    this.changeState(this.state.id, this.state.task, true);
-  }
+    this.setState({
+      edit: true
+    });
+  };
 
-  removeElement = (id) => {
-    this.props.del(id);
-  }
+  removeElement = () => {
+    this.props.del(this.state.id);
+  };
 
-  confirmEdit = (id) => {
-    const value = document.getElementById("editinput" + id).value;
-    this.props.change(id, value);
-    this.changeState(this.state.id, value, false);
-  }
+  confirmEdit = () => {
+    const value = this[`editInput${this.state.id}`].value;
+    this.props.change(this.state.id, value);
+    this.setState({
+      task: value,
+      edit: false
+    });
+  };
 
   cancelEdit = () => {
-    this.changeState(this.state.id, this.state.task, false);
-  }
+    this.setState({
+      edit: false
+    });
+  };
 
   render() {
     let form;
-    if(this.state.edit === false) {
-      form = 
-      <div className="container">
-        <div className="row row-centered" id={"dv" + this.state.id}>
-          <div className="col-md-5 offset-md-2">
-            <li id={"li" + this.state.id}>
-              <span id={"sp" + this.state.id}>{this.state.task}</span>
-            </li>
-          </div>
-          <div className="col-md-3">
-            <button type="button" className="btn btn-warning" onClick={() => this.editElement()}>
-              Изменить
-            </button>
-            <button type="button" className="btn btn-danger" onClick={() => this.removeElement(this.state.id)}>
-              Удалить
-            </button>
+    if (this.state.edit === false) {
+      form = (
+        <div className='container'>
+          <div className='row row-centered' id={'dv' + this.state.id}>
+            <div className='col-md-5 offset-md-2'>
+              <li id={'li' + this.state.id}>
+                <span id={'sp' + this.state.id}>{this.state.task}</span>
+              </li>
+            </div>
+            <div className='col-md-3'>
+              <button
+                type='button'
+                className='btn btn-warning'
+                onClick={() => this.editElement()}
+              >
+                Изменить
+              </button>
+              <button
+                type='button'
+                className='btn btn-danger'
+                onClick={() => this.props.del(this.state.id)}
+              >
+                Удалить
+              </button>
+            </div>
           </div>
         </div>
-      </div>;
+      );
     } else {
-      form = 
-      <div className="container">
-        <div className="row row-centered" id={"dv" + this.state.id}>
-          <div className="col-md-5 offset-md-2">
-            <li id={"li" + this.state.id}>
-              <input type="text" id={"editinput" + this.state.id} defaultValue={this.state.task} onChange={e => this.setState({ text: e.target.value })} placeholder="Напишите здесь задачу" required></input>
-            </li>
-          </div>
-          <div className="col-md-3">
-            <button type="button" className="btn btn-success" onClick={() => this.confirmEdit(this.state.id)}>
-              Подтвердить
-            </button>
-            <button type="button" className="btn btn-default" onClick={() => this.cancelEdit()}>
-              Отменить
-            </button>
+      form = (
+        <div className='container'>
+          <div className='row row-centered' id={'dv' + this.state.id}>
+            <div className='col-md-5 offset-md-2'>
+              <li id={'li' + this.state.id}>
+                <input
+                  type='text'
+                  id={'editInput' + this.state.id}
+                  defaultValue={this.state.task}
+                  ref={input => {
+                    this[`editInput${this.state.id}`] = input;
+                  }}
+                  placeholder='Напишите здесь задачу'
+                  required
+                />
+              </li>
+            </div>
+            <div className='col-md-3'>
+              <button
+                type='button'
+                className='btn btn-success'
+                onClick={() => this.confirmEdit()}
+              >
+                Подтвердить
+              </button>
+              <button
+                type='button'
+                className='btn btn-default'
+                onClick={() => this.cancelEdit()}
+              >
+                Отменить
+              </button>
+            </div>
           </div>
         </div>
-      </div>;
+      );
     }
     return form;
   }
 }
 
 export class ToDoList extends Component {
-  state = { tasks: [] };
+  state = {
+    tasks: [],
+    toDoCounter: 1,
+    curValue: ''
+  };
 
   addElement = () => {
-    const value = document.getElementById("myinput").value;
-    console.log(12345);
-    document.getElementById("myinput").value = '';
-    if (value !== '') {
-      this.state.tasks.push(value);
-      this.forceUpdate();
+    if (this.state.curValue !== '') {
+      this.setState({
+        tasks: [...this.state.tasks, [this.state.curValue, this.state.toDoCounter]],
+        toDoCounter: this.state.toDoCounter + 1,
+      });
     }
-  }
+  };
+
+  updateCurValue = evt => {
+    this.setState({
+      curValue: evt.target.value
+    });
+  };
 
   editElement = (id, value) => {
-    //не используется setState (forceUpdate), чтобы не рендерить весь список
-    this.state.tasks[id] = value;
-  }
-  
-  removeElement = (id) => {
-    delete this.state.tasks[id]
-    console.log(id);
+    this.state.tasks[id][0] = value;
+  };
+
+  removeElement = id => {
+    for (let i = 0; i < this.state.tasks.length; i++) { 
+      if (this.state.tasks[i][1] === id) {
+        this.state.tasks.splice(i, 1);
+      }
+    }
     this.forceUpdate();
-  }
+  };
 
   render() {
     var mylist = this.state.tasks.map((value, i) => {
-      return <EditForm id={i} key={i} value={value} edit={false} del={this.removeElement} change={this.editElement}/>;
-    })
+      return (
+        <EditForm
+          id={value[1]}
+          key={value[1]}
+          value={value[0]}
+          edit={false}
+          del={this.removeElement}
+          change={this.editElement}
+        />
+      );
+    });
 
     return (
-      <div className="App">
+      <div className='App'>
         <h4>Дополнительное задание. TODO</h4>
-        <p className="lead">To-do List</p>
-        <input type="text" id="myinput" placeholder="Напишите здесь задачу" required></input>
-        <button type="button" class="btn btn-success" onClick={() => this.addElement()}>Добавить</button>
+        <p className='lead'>To-do List</p>
+        <input
+          type='text'
+          id='myinput'
+          placeholder='Напишите здесь задачу'
+          onChange={evt => this.updateCurValue(evt)}
+        />
+        <button
+          type='button'
+          className='btn btn-success'
+          onClick={() => this.addElement()}
+        >
+          Добавить
+        </button>
         <ul>{mylist}</ul>
       </div>
     );

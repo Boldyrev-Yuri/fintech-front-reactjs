@@ -21,3 +21,11 @@ code {
   float: none;
   margin: 0 auto;
 }
+
+.hide {
+  visibility: hidden;
+}
+
+.show {
+  visibility: visible;
+}

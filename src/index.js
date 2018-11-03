@@ -6,11 +6,17 @@ import * as serviceWorker from './serviceWorker';
 
 const rootElement = document.getElementById("root");
 
-const page = 
-<div>
-    <Counter init={0} step={1} max={10} message={"Счетчик достиг предельного значения"} />
+const page = (
+  <div>
+    <Counter 
+      init={0}
+      step={1}
+      max={10}
+      message={"Счетчик достиг предельного значения"} 
+    />
     <ToDoList />
-</div>;
+  </div>
+);
 
 ReactDOM.render(page, rootElement);
 
